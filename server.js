@@ -4,12 +4,14 @@
 // it should load all routes from the file routes/index.js
 const express = require('express');
 const routes = require('./routes/index');
-const app = express();
+
+const server = express();
 const PORT = process.env.PORT || 5000;
 
 // it should load all routes from the file routes/index.js
-app.use('/', routes);
+server.use(express.json());// Middleware for parsing JSON bodies
+server.use(routes);
 
-app.listen(PORT, () => {
-	console.log(`Server is running on ${PORT}`);
+server.listen(PORT, () => {
+  console.log(`Server is running on ${PORT}`);
 });

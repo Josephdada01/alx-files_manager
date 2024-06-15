@@ -4,6 +4,8 @@
 // port: from the environment variable DB_PORT or default: 27017
 // database: from the environment variable DB_DATABASE or default: files_manager
 const { MongoClient } = require('mongodb');
+const mongo = require('mongodb');
+const { hashPassword } = require('./utils');
 
 class DBClient {
   constructor() {
@@ -76,6 +78,40 @@ class DBClient {
       console.error('Error counting files:', error);
       return -1;
     }
+  }
+
+  async createUser(email, password) {
+    const hashedPwd = hashPassword(password);
+    await this.client.connect();
+    const user = await this.client.db(this.database).collection('users').insertOne({ email, password: hashedPwd });
+    return user;
+  }
+
+  async getUser(email) {
+    await this.client.connect();
+    const user = await this.client.db(this.database).collection('users').find({ email }).toArray();
+    if (!user.length) {
+      return null;
+    }
+    return user[0];
+  }
+
+  async getUserById(id) {
+    const _id = new mongo.ObjectID(id);
+    await this.client.connect();
+    const user = await this.client.db(this.database).collection('users').find({ _id }).toArray();
+    if (!user.length) {
+      return null;
+    }
+    return user[0];
+  }
+
+  async userExist(email) {
+    const user = await this.getUser(email);
+    if (user) {
+      return true;
+    }
+    return false;
   }
 
   async disconnect() {
