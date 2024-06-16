@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 
 // the controller for the auth endpoint
 class AuthController {
-	static async connect(req, res) {
+	static async getConnect(req, res) {
 		const authHeader = req.headers.authorization;
 		if (!authHeader || !authHeader.startsWith('Basic ')) {
 			return res.status(401).json({ error: 'Unauthorized' });
@@ -35,7 +35,7 @@ class AuthController {
 		return res.status(200).json({ token });
 	}
 	// function that logout user based on token
-	static async disonnect(req, res){
+	static async getDisonnect(req, res){
 		const token = req.headers['x-token'];
 		if (!token) {
 			return res.status(401).json({ error: 'Unauthorized' });

@@ -29,7 +29,7 @@ class UsersController {
     return res.status(201).json({ id, email });
   }
   // GET /users/me should retrieve the user base on the token used:
-  static async getUserByToken(req, res) {
+  static async getMe(req, res) {
     const token = req.headers['x-token'];
     if (!token) {
       return res.status(401).json({ error: 'Unauthorized' });
