@@ -34,4 +34,25 @@ class AuthController {
 		// returning the token to the client
 		return res.status(200).json({ token });
 	}
+	// function that logout user based on token
+	static async disonnect(req, res){
+		const token = req.headers['x-token'];
+		if (!token) {
+			return res.status(401).json({ error: 'Unauthorized' });
+		}
+		const key = `auth_${token}`;
+
+		try {
+			const userId = await redisClient.get(key);
+			if (!userId) {
+				return res.status(401).json({ error: 'Unauthorized' });
+			}
+			await redisClient.del(key);
+			return res.status(204).send();
+		} catch (error) {
+			console.error('Error disconnecting user:', error);
+			return res.status(500).json({ error: 'Internal server error' });
+		}
+	}
 }
+module.exports = AuthController;
