@@ -35,7 +35,7 @@ class AuthController {
 		return res.status(200).json({ token });
 	}
 	// function that logout user based on token
-	static async getDisonnect(req, res){
+	static async getDisconnect(req, res){
 		const token = req.headers['x-token'];
 		if (!token) {
 			return res.status(401).json({ error: 'Unauthorized' });
