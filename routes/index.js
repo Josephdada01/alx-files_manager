@@ -9,7 +9,7 @@ const UsersController = require('../controllers/UsersController');
 const AuthController = require('../controllers/AuthController');
 //const UserController = require('../controllers/UserController');
 
-// definning the routes
+// definning the routes 
 router.get('/status', AppController.getStatus);
 router.get('/stats', AppController.getStats);
 router.post('/users', UsersController.postNew);
