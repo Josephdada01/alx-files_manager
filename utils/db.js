@@ -1,3 +1,4 @@
+#!/usr/bin/node
 // DBClient should have:
 // the constructor that creates a client to MongoDB:
 // host: from the environment variable DB_HOST or default: localhost

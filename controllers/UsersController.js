@@ -1,3 +1,4 @@
+#!/usr/bin/node
 const dbClient = require('../utils/db');
 const redisClient = require('../utils/redis');
 

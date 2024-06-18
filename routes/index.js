@@ -1,3 +1,4 @@
+#!/usr/bin/node
 // Inside the folder routes, create a file index.js that contains all endpoints of our API:
 // GET /status => AppController.getStatus
 // GET /stats => AppController.getStats
