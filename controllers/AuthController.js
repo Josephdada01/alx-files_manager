@@ -1,7 +1,7 @@
 const { v4 } = require('uuid');
 const dbClient = require('../utils/db');
 const redisClient = require('../utils/redis');
-const { getAuthzHeader, getToken, pwdHashed } = require('../utils/utils');
+const { getAuthzHeader, getToken, hashPassword } = require('../utils/utils');
 const { decodeToken, getCredentials } = require('../utils/utils');
 
 class AuthController {
@@ -31,7 +31,7 @@ class AuthController {
       res.end();
       return;
     }
-    if (user.password !== pwdHashed(password)) {
+    if (user.password !== hashPassword(password)) {
       res.status(401).json({ error: 'Unauthorized' });
       res.end();
       return;
