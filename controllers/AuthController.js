@@ -37,7 +37,7 @@ class AuthController {
       return;
     }
     const accessToken = v4();
-    await redisClient.set(auth_${accessToken}, user._id.toString('utf8'), 60 * 60 * 24);
+    await redisClient.set(`auth_${accessToken}`, user._id.toString('utf8'), 60 * 60 * 24);
     res.json({ token: accessToken });
     res.end();
   }
@@ -49,7 +49,7 @@ class AuthController {
       res.end();
       return;
     }
-    const id = await redisClient.get(auth_${token });
+    const id = await redisClient.get(`auth_${token }`);
     if (!id) {
       res.status(401).json({ error: 'Unauthorized' });
       res.end();
@@ -61,7 +61,7 @@ class AuthController {
       res.end();
       return;
     }
-    await redisClient.del(auth_${token});
+    await redisClient.del(`auth_${token}`);
     res.status(204).end();
   }
 
@@ -72,7 +72,7 @@ class AuthController {
       res.end();
       return;
     }
-    const id = await redisClient.get(auth_${token});
+    const id = await redisClient.get(`auth_${token}`);
     if (!id) {
       res.status(401).json({ error: 'Unauthorized' });
       res.end();
