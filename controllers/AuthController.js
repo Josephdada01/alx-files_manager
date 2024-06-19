@@ -62,31 +62,36 @@ class AuthController {
     await redisClient.del(`auth_${token}`);
     res.status(204).end();
   }
-
   static async getMe(req, res) {
     try {
-      const token = req.headers['x-token']; // use lowercase to avoid case sensitivity issues
+      const token = req.headers['x-token'];
       if (!token) {
+        console.log('Missing token');
         return res.status(401).json({ error: 'Unauthorized' });
       }
   
       const userId = await redisClient.get(`auth_${token}`);
+      console.log('Retrieved user ID from Redis:', userId); // Add debug log
+  
       if (!userId) {
+        console.log('Token not found or expired');
         return res.status(401).json({ error: 'Unauthorized' });
       }
   
       const user = await dbClient.getUserById(userId);
+      console.log('User fetched from DB:', user); // Add debug log
+  
       if (!user) {
+        console.log('User not found in DB');
         return res.status(401).json({ error: 'Unauthorized' });
       }
   
       res.json({ id: user._id, email: user.email });
     } catch (error) {
-      console.error('Error fetching user:', error);
+      console.error('Error in getMe:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
-  }
-  
+  }  
 }
 
 module.exports = AuthController;

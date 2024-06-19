@@ -1,35 +1,51 @@
 #!/usr/bin/node
-const sha1 = require('sha1');
-export const hashPassword = (password) => sha1(password);
-export const getAuthzHeader = (req) => {
-    const header = req.headers.authorization;
-    if (!header) {
+const Redis = require('ioredis');
+
+class RedisClient {
+  constructor() {
+    this.client = new Redis();
+    this.client.on('error', (err) => {
+      console.error('Redis error:', err);
+    });
+  }
+
+  async isAlive() {
+    try {
+      await this.client.ping();
+      return true;
+    } catch (error) {
+      console.error('Connection check failed:', error);
+      return false;
+    }
+  }
+
+  async get(key) {
+    try {
+      return await this.client.get(key); // Ensure it returns a string
+    } catch (error) {
+      console.error('Error getting value:', error);
       return null;
     }
-    return header;
-  };
-  
-  export const getToken = (authzHeader) => {
-    const tokenType = authzHeader.substring(0, 6);
-    if (tokenType !== 'Basic ') {
-      return null;
+  }
+
+  async set(key, value, duration) {
+    try {
+      await this.client.set(key, value, 'EX', duration);
+    } catch (error) {
+      console.error('Error setting value:', error);
+      throw error;
     }
-    return authzHeader.substring(6);
-  };
-  
-  export const decodeToken = (token) => {
-    const decodedToken = Buffer.from(token, 'base64').toString('utf8');
-    if (!decodedToken.includes(':')) {
-      return null;
+  }
+
+  async del(key) {
+    try {
+      await this.client.del(key);
+    } catch (error) {
+      console.error('Error deleting key:', error);
+      throw error;
     }
-    return decodedToken;
-  };
-  
-  export const getCredentials = (decodedToken) => {
-    const [email, password] = decodedToken.split(':');
-    if (!email || !password) {
-      return null;
-    }
-    return { email, password };
-  };
-  
+  }
+}
+
+const redisClient = new RedisClient();
+module.exports = redisClient;
