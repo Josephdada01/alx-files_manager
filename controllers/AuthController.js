@@ -7,41 +7,38 @@ const { decodeToken, getCredentials } = require('../utils/utils');
 
 class AuthController {
   static async getConnect(req, res) {
-    const authzHeader = getAuthzHeader(req);
-    if (!authzHeader) {
-      res.status(401).json({ error: 'Unauthorized' });
-      res.end();
-      return;
+    try {
+      const authzHeader = getAuthzHeader(req);
+      if (!authzHeader) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const token = getToken(authzHeader);
+      if (!token) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const decodedToken = decodeToken(token);
+      if (!decodedToken) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const { email, password } = getCredentials(decodedToken);
+      const user = await dbClient.getUser(email);
+      if (!user || user.password !== hashPassword(password)) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      const accessToken = v4();
+      await redisClient.set(`auth_${accessToken}`, user._id.toString(), 60 * 60 * 24); // Store as string
+      res.json({ token: accessToken });
+    } catch (error) {
+      console.error('Error during user connection:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
-    const token = getToken(authzHeader);
-    if (!token) {
-      res.status(401).json({ error: 'Unauthorized' });
-      res.end();
-      return;
-    }
-    const decodedToken = decodeToken(token);
-    if (!decodedToken) {
-      res.status(401).json({ error: 'Unauthorized' });
-      res.end();
-      return;
-    }
-    const { email, password } = getCredentials(decodedToken);
-    const user = await dbClient.getUser(email);
-    if (!user) {
-      res.status(401).json({ error: 'Unauthorized' });
-      res.end();
-      return;
-    }
-    if (user.password !== hashPassword(password)) {
-      res.status(401).json({ error: 'Unauthorized' });
-      res.end();
-      return;
-    }
-    const accessToken = v4();
-    await redisClient.set(`auth_${accessToken}`, user._id.toString('utf8'), 60 * 60 * 24);
-    res.json({ token: accessToken });
-    res.end();
   }
+
+  // Other methods remain unchanged
 
   static async getDisconnect(req, res) {
     const token = req.headers['x-token'];
