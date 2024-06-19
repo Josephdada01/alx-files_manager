@@ -14,33 +14,33 @@ class DBClient {
     const port = process.env.DB_PORT || '27017';
     const database = process.env.DB_DATABASE || 'files_manager';
 
-    // Correct the URL format
     const url = `mongodb://${host}:${port}/${database}`;
-
-    // Correct options
     this.client = new MongoClient(url, { useNewUrlParser: true, useUnifiedTopology: true });
     this.connection = null;
+  }
 
-    this.connect();
+  async init() {
+    try {
+      await this.connect();
+      console.log('Connected to MongoDB');
+    } catch (error) {
+      console.error('Error connecting to MongoDB:', error);
+    }
   }
 
   async connect() {
     try {
-      // Try to establish the connection
       await this.client.connect();
-      console.log('Connected to MongoDB');
-      this.connection = this.client.db(); // Select the database
+      this.connection = this.client.db();
     } catch (error) {
       console.error('Error connecting to MongoDB:', error);
       this.connection = null;
     }
   }
-
-  // a function isAlive that returns true when the connection to MongoDB is success otherwise,false
+// a function isAlive that returns true when the connection to MongoDB is success otherwise,false
   async isAlive() {
     try {
-      // Check if client is connected and database is accessible
-      if (!this.connection) {
+      if (!this.connection || !this.client.isConnected()) {
         await this.connect();
       }
       await this.connection.admin().ping();
@@ -50,8 +50,7 @@ class DBClient {
       return false;
     }
   }
-
-  // an asynchronous function nbUsers that returns the number of documents in the collection users
+// an asynchronous function nbUsers that returns the number of documents in the collection users
   async nbUsers() {
     try {
       if (!this.connection) {
@@ -65,8 +64,7 @@ class DBClient {
       return -1;
     }
   }
-
-  // an asynchronous function nbFiles that returns the number of documents in the collection files
+// an asynchronous function nbFiles that returns the number of documents in the collection files
   async nbFiles() {
     try {
       if (!this.connection) {
@@ -83,14 +81,12 @@ class DBClient {
 
   async createUser(email, password) {
     const hashedPwd = hashPassword(password);
-    await this.client.connect();
-    const user = await this.client.db(this.database).collection('users').insertOne({ email, password: hashedPwd });
+    const user = await this.connection.collection('users').insertOne({ email, password: hashedPwd });
     return user;
   }
 
   async getUser(email) {
-    await this.client.connect();
-    const user = await this.client.db(this.database).collection('users').find({ email }).toArray();
+    const user = await this.connection.collection('users').find({ email }).toArray();
     if (!user.length) {
       return null;
     }
@@ -99,8 +95,7 @@ class DBClient {
 
   async getUserById(id) {
     const _id = new mongo.ObjectID(id);
-    await this.client.connect();
-    const user = await this.client.db(this.database).collection('users').find({ _id }).toArray();
+    const user = await this.connection.collection('users').find({ _id }).toArray();
     if (!user.length) {
       return null;
     }
@@ -127,6 +122,8 @@ class DBClient {
     }
   }
 }
-// After the class definition, create and export an instance of DBClient called dbClient.
+
 const dbClient = new DBClient();
+dbClient.init();
+
 module.exports = dbClient;
