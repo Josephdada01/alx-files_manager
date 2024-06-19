@@ -4,7 +4,7 @@
 // host: from the environment variable DB_HOST or default: localhost
 // port: from the environment variable DB_PORT or default: 27017
 // database: from the environment variable DB_DATABASE or default: files_manager
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const mongo = require('mongodb');
 const { hashPassword } = require('./utils');
 
@@ -109,7 +109,35 @@ class DBClient {
     }
     return false;
   }
-
+  // for file creation
+  async createFile(fileData) {
+    try {
+      if (!this.connection) {
+        throw new Error('No database connection');
+      }
+      const filesCollection = this.connection.collection('files');
+      const result = await filesCollection.insertOne(fileData);
+      const insertedFile = result.ops[0];
+      return insertedFile;
+    } catch (error) {
+      console.error('Error creating file:', error);
+      throw error;
+    }
+  }
+  // getting the file by id
+  async getFileById(id) {
+    try {
+      if (!this.connection) {
+        throw new Error('No database connection');
+      }
+      const filesCollection = this.connection.collection('files');
+      const file = await filesCollection.findOne({ _id: new ObjectId(id) });
+      return file;
+    } catch (error) {
+      console.error('Error getting file by ID:', error);
+      return null;
+    }
+  }
   async disconnect() {
     try {
       if (this.client) {

@@ -8,6 +8,7 @@ const router = express.Router();
 const AppController = require('../controllers/AppController');
 const UsersController = require('../controllers/UsersController');
 const AuthController = require('../controllers/AuthController');
+const FilesController = require('../controllers/FilesController');
 //const UserController = require('../controllers/UserController');
 
 // definning the routes 
@@ -23,7 +24,7 @@ router.post('/users', UsersController.postNew ? UsersController.postNew : (req, 
 router.get('/connect', AuthController.getConnect ? AuthController.getConnect : (req, res) => {});
 router.get('/disconnect', AuthController.getDisconnect ? AuthController.getDisconnect : (req, res) => {});
 router.get('/users/me', UsersController.getMe ? UsersController.getMe : (req, res) => {});
-
+router.post('/files', FilesController.postUpload ? FilesController.postUpload: (req, res) => {});
 
 // This code checks if each controller method is defined before calling it.
 // If it's not defined, it uses a default callback function that does nothing.
