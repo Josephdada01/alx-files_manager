@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
-const redisClient = ('../utils/redis');
+const redisClient = require('../utils/redis');
 const dbClient = require('../utils/db');
 
 // files controller
@@ -51,7 +51,7 @@ class FilesController {
             if (!fs.existsSync(folderPath)) {
                 fs.mkdirSync(folderPath, { recursive: true });
             }
-            const localPath = path.json(folderPath, uuidv4());
+            const localPath = path.join(folderPath, uuidv4());
             fs.writeFileSync(localPath, Buffer.from(data, 'base64'));
             fileData.localPath = localPath;
         }
